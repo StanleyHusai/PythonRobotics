@@ -268,15 +268,15 @@ def plot_arrow(x, y, yaw, length=1.0, width=0.5, fc="r", ec="k"):
 def main():
     print("Dubins path planner sample start!!")
 
-    start_x = 1.0  # [m]
-    start_y = 1.0  # [m]
-    start_yaw = math.radians(45.0)  # [rad]
+    start_x = 0.0  # [m]
+    start_y = 0.0  # [m]
+    start_yaw = math.radians(90.0)  # [rad]
 
     end_x = -3.0  # [m]
-    end_y = -3.0  # [m]
-    end_yaw = math.radians(-45.0)  # [rad]
+    end_y = 5.0  # [m]
+    end_yaw = math.radians(180.0)  # [rad]
 
-    curvature = 1.0
+    curvature = 3.0
 
     px, py, pyaw, mode, clen = dubins_path_planning(start_x, start_y, start_yaw,
                                                     end_x, end_y, end_yaw, curvature)
@@ -334,5 +334,5 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    #test()
     main()

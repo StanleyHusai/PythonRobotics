@@ -14,18 +14,14 @@ import math
 
 show_animation = True
 
-MOVES = [ (0.5, math.radians(0)),    # move ahead
-          (0.5, math.radians(90)),   # turn left
-          (0.5, math.radians(-90)) ] # turn right
 
 class Node:
 
-    def __init__(self, x, y, cost, pind, theta):
+    def __init__(self, x, y, cost, pind):
         self.x = x
         self.y = y
         self.cost = cost
         self.pind = pind
-        self.theta = theta
 
     def __str__(self):
         return str(self.x) + "," + str(self.y) + "," + str(self.cost) + "," + str(self.pind)
@@ -44,7 +40,7 @@ def calc_fianl_path(ngoal, closedset, reso):
     return rx, ry
 
 
-def a_star_planning(sx, sy, stheta, gx, gy, gtheta, ox, oy, reso, rr):
+def a_star_planning(sx, sy, gx, gy, ox, oy, reso, rr):
     """
     gx: goal x position [m]
     gx: goal x position [m]
@@ -54,8 +50,8 @@ def a_star_planning(sx, sy, stheta, gx, gy, gtheta, ox, oy, reso, rr):
     rr: robot radius[m]
     """
 
-    nstart = Node(round(sx / reso), round(sy / reso), 0.0, -1, theta)
-    ngoal = Node(round(gx / reso), round(gy / reso), 0.0, -1, theta)
+    nstart = Node(round(sx / reso), round(sy / reso), 0.0, -1)
+    ngoal = Node(round(gx / reso), round(gy / reso), 0.0, -1)
     ox = [iox / reso for iox in ox]
     oy = [ioy / reso for ioy in oy]
 
@@ -63,13 +59,13 @@ def a_star_planning(sx, sy, stheta, gx, gy, gtheta, ox, oy, reso, rr):
 
     motion = get_motion_model()
 
-    openset, closedset = dict(), dict() #create 2 empty dictionary
+    openset, closedset = dict(), dict()
     openset[calc_index(nstart, xw, minx, miny)] = nstart
 
     while 1:
         c_id = min(
             openset, key=lambda o: openset[o].cost + calc_heuristic(ngoal, openset[o]))
-        current = openset[c_id]   # F=G+H choose node with minimun F as the current node
+        current = openset[c_id]
 
         # show graph
         if show_animation:
@@ -92,7 +88,7 @@ def a_star_planning(sx, sy, stheta, gx, gy, gtheta, ox, oy, reso, rr):
         for i in range(len(motion)):
             node = Node(current.x + motion[i][0],
                         current.y + motion[i][1],
-                        current.cost + motion[i][2], c_id, theta_new)
+                        current.cost + motion[i][2], c_id)
             n_id = calc_index(node, xw, minx, miny)
 
             if n_id in closedset:
@@ -174,16 +170,18 @@ def calc_obstacle_map(ox, oy, reso, vr):
 def calc_index(node, xwidth, xmin, ymin):
     return (node.y - ymin) * xwidth + (node.x - xmin)
 
+
 def get_motion_model():
     # dx, dy, cost
-    motion = []
-    for move in MOVES:
-        theta_new = current.theta + move[1]
-        dx = math.cos(theta_new) * move[0]
-        dy = math.sin(theta_new) * move[0]
-        dcost = math.sqrt(dx**2 + dy**2)
-        dmotion = [dx, dy, dcost]
-        motion.append(dmotion)
+    motion = [[1, 0, 1],
+              [0, 1, 1],
+              [-1, 0, 1],
+              [0, -1, 1],
+              [-1, -1, math.sqrt(2)],
+              [-1, 1, math.sqrt(2)],
+              [1, -1, math.sqrt(2)],
+              [1, 1, math.sqrt(2)]]
+
     return motion
 
 
@@ -192,11 +190,9 @@ def main():
 
     # start and goal position
     sx = 10.0  # [m]
-    sy = 10.0
-    stheta = 0.0  # [m]
+    sy = 10.0  # [m]
     gx = 50.0  # [m]
-    gy = 50.0
-    gtheta = 0.0  # [m]
+    gy = 50.0  # [m]
     grid_size = 1.0  # [m]
     robot_size = 1.0  # [m]
 
@@ -230,7 +226,7 @@ def main():
         plt.grid(True)
         plt.axis("equal")
 
-    rx, ry = a_star_planning(sx, sy, stheta, gx, gy, gtheta, ox, oy, grid_size, robot_size)
+    rx, ry = a_star_planning(sx, sy, gx, gy, ox, oy, grid_size, robot_size)
     #print rx,ry
 
     if show_animation:
